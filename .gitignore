@@ -3,3 +3,15 @@
 ################################################################################
 
 /CumulusPro.Saml.Prototype/bin
+/CumulusPro.Saml.Prototype/obj/Debug
+/packages
+/.vs/CumulusPro.Saml/v15/Server/sqlite3
+/.vs/CumulusPro.Saml/v15/.suo
+/.vs/CumulusPro.Saml.Prototype/v15/Server/sqlite3
+/.vs/CumulusPro.Saml.Prototype/v15/.suo
+/.vs/Sources/v15/.suo
+/.vs/VSWorkspaceState.json
+/.vs/slnx.sqlite
+/Sustainsys.Saml2/Sustainsys.Saml2/obj/Debug
+/Sustainsys.Saml2/Sustainsys.Saml2.HttpModule/obj/Debug
+/Sustainsys.Saml2/Sustainsys.Saml2.Mvc/obj/Debug
