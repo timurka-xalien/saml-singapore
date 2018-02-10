@@ -13,10 +13,9 @@ namespace CumulusPro.Saml.Prototype.Controllers
             return View();
         }
 
-        public ActionResult About()
+        [Authorize(Roles = "Admins")]
+        public ActionResult AdminsOnly()
         {
-            ViewBag.Message = "Your application description page.";
-
             return View();
         }
 

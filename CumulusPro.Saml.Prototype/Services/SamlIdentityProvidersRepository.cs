@@ -17,47 +17,27 @@ namespace CumulusPro.Saml.Prototype.Services
 
         public void CreateDefaultConfiguration()
         {
-            var ipdCone = new SamlIdentityProvider
+            var idpOkta = new SamlIdentityProvider
             {
                 Id = Guid.NewGuid(),
-                EntityId = "http://cone-idp",
-                Description = "Cone Identity Provider",
+                EntityId = "http://www.okta.com/exkok2qjhccpG6A4v2p6",
+                Description = "Okta Identity Provider",
                 RegisteredDomains =
                 {
                     new EmailDomain
                     {
                         Id = Guid.NewGuid(),
-                        Domain = "cone.com"
+                        Domain = "okta.com"
                     },
                     new EmailDomain
                     {
                         Id = Guid.NewGuid(),
-                        Domain = "cone.net"
+                        Domain = "adidas.com"
                     }
                 }
             };
 
-            var idpShib = new SamlIdentityProvider
-            {
-                Id = Guid.NewGuid(),
-                EntityId = "https://shib-idp/",
-                Description = "Shibboleth Identity Provider",
-                RegisteredDomains =
-                {
-                    new EmailDomain
-                    {
-                        Id = Guid.NewGuid(),
-                        Domain = "shib.com"
-                    },
-                    new EmailDomain
-                    {
-                        Id = Guid.NewGuid(),
-                        Domain = "shibboleth.net"
-                    }
-                }
-            };
-
-            var ipdKentor = new SamlIdentityProvider
+            var ipdSustainsys = new SamlIdentityProvider
             {
                 Id = Guid.NewGuid(),
                 EntityId = "https://sustainsys.saml2.stubidp/Metadata",
@@ -79,9 +59,8 @@ namespace CumulusPro.Saml.Prototype.Services
 
             _registeredProviders = new List<SamlIdentityProvider>()
             {
-                ipdCone,
-                idpShib,
-                ipdKentor,
+                idpOkta,
+                ipdSustainsys,
             };
         }
 
