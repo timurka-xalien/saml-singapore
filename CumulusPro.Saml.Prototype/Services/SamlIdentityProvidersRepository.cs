@@ -60,19 +60,19 @@ namespace CumulusPro.Saml.Prototype.Services
             var ipdKentor = new SamlIdentityProvider
             {
                 Id = Guid.NewGuid(),
-                EntityId = "http://kentor-idp/Metadata",
-                Description = "Kentor Identity Provider",
+                EntityId = "https://sustainsys.saml2.stubidp/Metadata",
+                Description = "Sustainsys Identity Provider",
                 RegisteredDomains =
                 {
                     new EmailDomain
                     {
                         Id = Guid.NewGuid(),
-                        Domain = "kentor.com"
+                        Domain = "sustainsys.com"
                     },
                     new EmailDomain
                     {
                         Id = Guid.NewGuid(),
-                        Domain = "kentorsome.net"
+                        Domain = "sustain.net"
                     }
                 }
             };

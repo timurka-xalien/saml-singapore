@@ -24,6 +24,27 @@ namespace CumulusPro.Saml.Prototype.Services
             _authenticationManager = authenticationManager;
         }
 
+        public bool AuthenticateLocal(string email, string password)
+        {
+            _logger.Log(LogLevel.Debug, $"SAML: AuthenticationService.Authenticate: Authenticate user {email}");
+
+            var user = FindUser(_userManager, email, password);
+
+            if (user != null)
+            {
+                var identity = _userManager.CreateIdentity(user, DefaultAuthenticationTypes.ApplicationCookie);
+
+                identity.AddClaim(new Claim(nameof(AuthenticationType), AuthenticationType.Local.ToString()));
+
+                // Sign in user
+                _authenticationManager.SignIn(new AuthenticationProperties() { IsPersistent = true }, identity);
+
+                return true;
+            }
+
+            return false;
+        }
+
         public bool Authenticate(
             AuthenticationType authenticationType, 
             string email, 
@@ -39,7 +60,7 @@ namespace CumulusPro.Saml.Prototype.Services
                 var identity = _userManager.CreateIdentity(user, DefaultAuthenticationTypes.ApplicationCookie);
 
                 // Save received attributes as claims
-                InitializeUserClaims(authenticationType, email, additionalClaims, identity);
+                //InitializeUserClaims(authenticationType, email, additionalClaims, identity);
 
                 // Sign in user
                 _authenticationManager.SignIn(new AuthenticationProperties() { IsPersistent = true }, identity);
@@ -50,31 +71,31 @@ namespace CumulusPro.Saml.Prototype.Services
             return false;
         }
 
-        private static void InitializeUserClaims(
-            AuthenticationType authenticationType, 
-            string email,
-            IDictionary<string, string> additionalClaims, 
-            ClaimsIdentity identity)
-        {
-            _logger.Log(LogLevel.Debug, $"SAML: AuthenticationService.InitializeUserClaims: Initialize claims of user {identity.Name}");
+        //private static void InitializeUserClaims(
+        //    AuthenticationType authenticationType, 
+        //    string email,
+        //    IDictionary<string, string> additionalClaims, 
+        //    ClaimsIdentity identity)
+        //{
+        //    _logger.Log(LogLevel.Debug, $"SAML: AuthenticationService.InitializeUserClaims: Initialize claims of user {identity.Name}");
 
-            identity.AddClaim(new Claim(nameof(AuthenticationType), authenticationType.ToString()));
+        //    identity.AddClaim(new Claim(nameof(AuthenticationType), authenticationType.ToString()));
 
-            if (additionalClaims != null)
-            {
-                identity.AddClaims(additionalClaims.Select(attr => new Claim(attr.Key, attr.Value)));
-            }
+        //    if (additionalClaims != null)
+        //    {
+        //        identity.AddClaims(additionalClaims.Select(attr => new Claim(attr.Key, attr.Value)));
+        //    }
 
-            // Check if user email is present in claims or attributes under a standard claim type
-            if (!identity.HasClaim(c => c.Type == ClaimTypes.Email))
-            {
-                // Add email claim under a standard claim type
-                identity.AddClaim(new Claim(ClaimTypes.Email, email));
-            }
+        //    // Check if user email is present in claims or attributes under a standard claim type
+        //    if (!identity.HasClaim(c => c.Type == ClaimTypes.Email))
+        //    {
+        //        // Add email claim under a standard claim type
+        //        identity.AddClaim(new Claim(ClaimTypes.Email, email));
+        //    }
 
-            _logger.Log(LogLevel.Debug, $"SAML: AuthenticationService.InitializeUserClaims: Initialized claims of user {identity.Name}:\r\n" +
-                Utils.SerializeToJson(identity.Claims.Select(c => new { c.Type, c.Value })));
-        }
+        //    _logger.Log(LogLevel.Debug, $"SAML: AuthenticationService.InitializeUserClaims: Initialized claims of user {identity.Name}:\r\n" +
+        //        Utils.SerializeToJson(identity.Claims.Select(c => new { c.Type, c.Value })));
+        //}
 
         public ApplicationUser FindUser(ApplicationUserManager userManager, string userEmail, string password = null)
         {

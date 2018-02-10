@@ -76,7 +76,7 @@ namespace CumulusPro.Saml.Prototype.Controllers
                 _logger.Log(LogLevel.Debug, $"SAML: AccountController.Login: Redirecting user to {idpEntityId} for login.");
 
                 return RedirectToAction(
-                    "SignIn", "Saml2", new { idp = HttpUtility.UrlEncode(idpEntityId), returnUrl = returnUrl });
+                    "SignIn", "Saml2", new { idp = idpEntityId, returnUrl = returnUrl });
             }
 
             _logger.Log(LogLevel.Debug, $"SAML: AccountController.Login: Log in user {model.Email} locally.");
