@@ -9,26 +9,31 @@
     <h1>Cumulus Pro Pte Ltd<br/> SAML Prototype</h1>
     <p class="lead">This prototype is an example of implementation of SAML2 SSO with third-party SAML Identity Providers (Authentication Servers).</p>
     <p><a href="https://github.com/Sustainsys/Saml2">Sustainsys.Saml2</a> library is used</p>
+
+@if (!this.User.Identity.IsAuthenticated)
+{
     <p>Please proceed to @Html.ActionLink("Log in page", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink" }) and try to login locally or via any supported Identity Provider</p>
+}
 </div>
 
 @if (this.User.Identity.IsAuthenticated)
 {
     <div class="row">
         <div class="col-md-4">
-            <h2>Logged in as @User.Identity.Name</h2>
+            <h3>Logged in as @User.Identity.Name</h3>
             <p>
+                <br />
                 @{
                     // Display the attributes returned by the identity provider.
                     var claims = ((ClaimsIdentity)HttpContext.Current.User.Identity).Claims;
 
                     if (claims.Count() > 0)
                     {
-                        <h2>User Claims</h2>
+                        <h4>User Claims</h4>
 
                         foreach (var claim in claims)
                         {
-                        <p>@claim.Type: @claim.Value</p>
+                        <p><b>@claim.Type:</b><br/>@claim.Value</p>
                         }
                     }
                 }
