@@ -82,9 +82,14 @@
             @*Login via Additional IdP*@
             <h4>Or login using IdP login button</h4>
             <hr />
-            <a href="@Url.Action("Login", "SAML", new { domain = "allianz.fr" })">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/1/14/OpenAM-web-transparent.png" />
-            </a>
+            @foreach (SamlIdentityProvider idp in ViewBag.IdentityProviders)
+            {
+                <div class="idp-login-btn">
+                    <a href="@Url.Action("SignIn", "SAML2", new { idp = idp.EntityId, returnUrl = ViewBag.ReturnUrl })">
+                        <img src="@idp.LogoUrl" width="100"/>
+                    </a>
+                </div>
+            }
         </section>
         @*<section id="socialLoginForm">
                 @Html.Partial("_ExternalLoginsListPartial", new ExternalLoginListViewModel { ReturnUrl = ViewBag.ReturnUrl })

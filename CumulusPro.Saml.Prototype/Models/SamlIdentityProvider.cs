@@ -9,8 +9,6 @@ namespace CumulusPro.Saml.Prototype.Models
         {
             RegisteredDomains = new List<EmailDomain>();
 
-            // Default configuration
-            SignAuthnRequest = true;
             SingleLogoutSupported = true;
         }
 
@@ -20,17 +18,9 @@ namespace CumulusPro.Saml.Prototype.Models
 
         public string Description { get; set; }
 
-        public bool SignAuthnRequest { get; set; }
-
-        public string SingleSignOnUrl { get; set; }
-
-        public string SingleLogoutUrl { get; set; }
-
-        public string CertificateFile { get; set; }
-
         public bool SingleLogoutSupported { get; set; }
 
-        public bool UseEmbeddedCertificate { get; set; }
+        public string LogoUrl { get; set; }
 
         public List<EmailDomain> RegisteredDomains { get; set; }
     }

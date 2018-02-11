@@ -22,6 +22,7 @@ namespace CumulusPro.Saml.Prototype.Services
                 Id = Guid.NewGuid(),
                 EntityId = "http://www.okta.com/exkok2qjhccpG6A4v2p6",
                 Description = "Okta Identity Provider",
+                LogoUrl = "https://www.okta.com/sites/all/themes/Okta/images/blog/Logos/Okta_Logo_BrightBlue_Medium.png",
                 RegisteredDomains =
                 {
                     new EmailDomain
@@ -42,6 +43,7 @@ namespace CumulusPro.Saml.Prototype.Services
                 Id = Guid.NewGuid(),
                 EntityId = "https://sustainsys.saml2.stubidp/Metadata",
                 Description = "Sustainsys Identity Provider",
+                LogoUrl = "https://stubidp.sustainsys.com/content/sustainsys.png",
                 RegisteredDomains =
                 {
                     new EmailDomain
