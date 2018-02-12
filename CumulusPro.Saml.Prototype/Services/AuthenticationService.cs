@@ -1,18 +1,16 @@
 ﻿using CumulusPro.Saml.Prototype.Models;
-using CumulusPro.Saml.Prototype.Services.Services;
 using Microsoft.AspNet.Identity;
 using Microsoft.Owin.Security;
 using NLog;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Web;
 
 namespace CumulusPro.Saml.Prototype.Services
 {
     public class AuthenticationService
     {
+        private ClaimsService _claimsService;
         private static Logger _logger = LogManager.GetCurrentClassLogger();
 
         private IAuthenticationManager _authenticationManager;
@@ -22,6 +20,7 @@ namespace CumulusPro.Saml.Prototype.Services
         {
             _userManager = userManager;
             _authenticationManager = authenticationManager;
+            _claimsService = new ClaimsService();
         }
 
         public bool AuthenticateLocal(string email, string password)
@@ -45,10 +44,46 @@ namespace CumulusPro.Saml.Prototype.Services
             return false;
         }
 
+        public void RegisterNewUserIfNeeded(ClaimsPrincipal principal)
+        {
+            // Require email to be passed by SAML IdP
+            // Update logic below according to your needs
+            var email = principal.FindFirst(ClaimTypes.Email)?.Value;
+
+            if (email == null)
+            {
+                throw new InvalidOperationException("Cannot register user. Email is missing.");
+            }
+
+            var existingUser = FindUser(_userManager, email, email);
+
+            if (existingUser != null)
+            {
+                return;
+            }
+
+            _logger.Log(LogLevel.Debug, $"SAML: AuthenticationService.RegisterNewUserIfNeeded: Register user {email}");
+
+            var newUser = _claimsService.CreateApplicationUserFromPrincipal(principal);
+
+            // Use fake password as SAML authenticated user won't enter it on our web site and we cannot leave it empty
+            var result = _userManager.Create(newUser, email);
+
+            if (!result.Succeeded)
+            {
+                var errors = string.Join("\r\n", result.Errors);
+
+                _logger.Log(LogLevel.Error, $"AuthenticationService.RegisterNewUserIfNeeded: " +
+                    $"Error while registering user: {errors}");
+
+                throw new Exception($"Failed to register user: {errors}");
+            }
+        }
+
         public bool Authenticate(
-            AuthenticationType authenticationType, 
-            string email, 
-            string password,
+        AuthenticationType authenticationType, 
+        string email, 
+        string password,
             IDictionary<string, string> additionalClaims = null)
         {
             _logger.Log(LogLevel.Debug, $"SAML: AuthenticationService.Authenticate: Authenticate user {email}");

@@ -1,7 +1,4 @@
-﻿using CumulusPro.Saml.Prototype.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Microsoft.AspNet.Identity.Owin;
 using System.Security.Claims;
 using System.Web;
 
@@ -14,24 +11,42 @@ namespace CumulusPro.Saml.Prototype.Services
     /// </summary>
     public class SamlClaimsAuthenticationManager : ClaimsAuthenticationManager
     {
-        private const string IdentityProviderClaimType =
-            @"http://schemas.microsoft.com/accesscontrolservice/2010/07/claims/identityprovider";
-        private const string ExternalSaml2SsoIdentityProvider = "External SAML2 SSO IdentityProvider";
+        private AuthenticationService _authenticationService;
+        private ClaimsService _claimsService;
+
+        public SamlClaimsAuthenticationManager()
+        {
+            _claimsService = new ClaimsService();
+            // Cannot create AuthenticationService here as this ctor is called at a very early stage when HttpContext is not avaialable
+        }
+
+        public AuthenticationService AuthenticationService
+        {
+            get
+            {
+                if (_authenticationService == null)
+                {
+                    _authenticationService = _authenticationService = new AuthenticationService(
+                        HttpContext.Current?.GetOwinContext()?.Authentication,
+                        HttpContext.Current?.GetOwinContext()?.GetUserManager<ApplicationUserManager>());
+                }
+
+                return _authenticationService;
+            }
+        }
 
         public override ClaimsPrincipal Authenticate(string resourceName, ClaimsPrincipal incomingPrincipal)
         {
-            var identity = (ClaimsIdentity)incomingPrincipal.Identity;
-
-            identity.AddClaim(new Claim(nameof(AuthenticationType), AuthenticationType.Saml.ToString()));
-
-            if (incomingPrincipal.FindFirst(IdentityProviderClaimType) == null)
-            {
-                identity.AddClaim(new Claim(IdentityProviderClaimType, ExternalSaml2SsoIdentityProvider));
-            }
-            //     var newPrincipal = new ClaimsPrincipal(incomingPrincipal);
-            //    return newPrincipal;
+            _claimsService.SetPrincipalAdditionalClaims(incomingPrincipal);
+            RegisterUserIfNeeded(incomingPrincipal);
 
             return incomingPrincipal;
+        }
+
+        private void RegisterUserIfNeeded(ClaimsPrincipal incomingPrincipal)
+        {
+            // Call your user registration logic here
+            AuthenticationService.RegisterNewUserIfNeeded(incomingPrincipal);
         }
     }
 }
