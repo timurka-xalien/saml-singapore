@@ -62,10 +62,29 @@ namespace CumulusPro.Saml.Prototype.Services
                 }
             };
 
+            var ipdOnelogin = new SamlIdentityProvider
+            {
+                Id = Guid.NewGuid(),
+                EntityId = "https://app.onelogin.com/saml/metadata/752622",
+                Description = "Onelogin Identity Provider",
+                LogoUrl = "https://www.onelogin.com/assets/img/new-logo-onelogin.svg",
+                SilentLogout = true,
+                RedirectOnLogoutUrl = "https://wrety-dev.onelogin.com/portal/",
+                RegisteredDomains =
+                {
+                    new EmailDomain
+                    {
+                        Id = Guid.NewGuid(),
+                        Domain = "onelogin.com"
+                    }
+                }
+            };
+
             _registeredProviders = new List<SamlIdentityProvider>()
             {
                 idpOkta,
                 ipdSustainsys,
+                ipdOnelogin
             };
         }
 

@@ -1,5 +1,6 @@
 ﻿using CumulusPro.Saml.Prototype.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
@@ -9,6 +10,13 @@ namespace CumulusPro.Saml.Prototype.Services
     public class ClaimsService
     {
         private const string DefaultUserName = "Anonymous";
+
+        // Onelogin uses non-standard claim types
+        private const string OneloginEmailClaimType = "User.email";
+        private const string OneloginFirstNameClaimType = "User.FirstName";
+        private const string OneloginLastNameClaimType = "User.LastName";
+        private const string OneloginRoleClaimType = "memberOf";
+
         private const string IdentityProviderClaimType =
             @"http://schemas.microsoft.com/accesscontrolservice/2010/07/claims/identityprovider";
 
@@ -18,16 +26,22 @@ namespace CumulusPro.Saml.Prototype.Services
 
             AddAuthenticationTypeClaim(identity);
             AddIdentityProviderClaim(identity);
-            AddNameClaim(identity);
+
+            // IdentityProvider may use non-standard claim/attribute types. Add standard claim types in such case
+            // Code below does not delete original non-standard claims added from SAML attributes. 
+            // Change according to your needs
+            EnsureStandardNamesClamesDefined(identity);
+            EnsureStandardEmailClaimDefined(identity);
+            EnsureStandardRolesClaimsDefined(identity);
         }
 
-        private static void AddAuthenticationTypeClaim(ClaimsIdentity identity)
+        private void AddAuthenticationTypeClaim(ClaimsIdentity identity)
         {
             // Add claim AuthenticationType to be able to determine how user was authenticated 
             identity.AddClaim(new Claim(nameof(AuthenticationType), AuthenticationType.Saml.ToString()));
         }
 
-        private static void AddIdentityProviderClaim(ClaimsIdentity identity)
+        private void AddIdentityProviderClaim(ClaimsIdentity identity)
         {
             // IdP EntityId is specified as Issuer of all claims, save it as distinct IdentityProvider claim for clarity. 
             // Besides, we do need this claim either way as ASP.NET MVC uses it to generate AntiForgeryToken
@@ -38,22 +52,58 @@ namespace CumulusPro.Saml.Prototype.Services
             }
         }
 
-        private void AddNameClaim(ClaimsIdentity identity)
+        private void EnsureStandardNamesClamesDefined(ClaimsIdentity identity)
         {
             var (firstName, lastName, userName) = GetUserNames(identity);
 
-            // Add Name claim if it doesn't exist 
+            // Add standard Name claim if it is not defined
             if (identity.FindFirst(ClaimTypes.Name) == null)
             {
                 identity.AddClaim(new Claim(ClaimTypes.Name, userName));
+            }
+
+            // Add standard FirstName claim if it is not defined
+            if (identity.FindFirst(ClaimTypes.GivenName) == null)
+            {
+                identity.AddClaim(new Claim(ClaimTypes.GivenName, firstName));
+            }
+
+            // Add standard LastName claim if it is not defined
+            if (identity.FindFirst(ClaimTypes.Surname) == null)
+            {
+                identity.AddClaim(new Claim(ClaimTypes.Surname, lastName));
+            }
+        }
+
+        private void EnsureStandardEmailClaimDefined(ClaimsIdentity identity)
+        {
+            var email = GetEmail(identity);
+
+            // Add standard Email claim if it is not defined
+            if (identity.FindFirst(ClaimTypes.Email) == null)
+            {
+                identity.AddClaim(new Claim(ClaimTypes.Email, email));
+            }
+        }
+
+        private void EnsureStandardRolesClaimsDefined(ClaimsIdentity identity)
+        {
+            // Add standard Role claim if it is not defined
+            if (identity.FindFirst(ClaimTypes.Role) == null)
+            {
+                var roles = GetRoles(identity);
+
+                identity.AddClaims(roles.Select(r => new Claim(ClaimTypes.Role, r)));
             }
         }
 
         public ApplicationUser CreateApplicationUserFromPrincipal(ClaimsPrincipal principal)
         {
-            var email = principal.FindFirst(ClaimTypes.Email).Value;
+            var identity = (ClaimsIdentity)principal.Identity;
+
+            var email = GetEmail(identity);
             var id = GetUserId(principal, email);
-            var (firstName, lastName, userName) = GetUserNames((ClaimsIdentity)principal.Identity);
+            var (firstName, lastName, userName) = GetUserNames(identity);
 
             return new ApplicationUser
             {
@@ -66,13 +116,35 @@ namespace CumulusPro.Saml.Prototype.Services
             };
         }
 
+        public string GetEmail(ClaimsIdentity identity)
+        {
+            // SAML IdP may pass email in the attributes with non-standard name
+            // Update logic below according to your needs
+
+            return identity.FindFirst(ClaimTypes.Email)?.Value 
+                ?? identity.FindFirst(OneloginEmailClaimType)?.Value;
+        }
+
+        private IEnumerable<string> GetRoles(ClaimsIdentity identity)
+        {
+            // SAML IdP may pass roles/groups in the attributes with non-standard name
+            // Update logic below according to your needs
+            // Use another role/group claim type if ClaimTypes.Role doesn't fit your needs
+
+            return identity.FindAll(ClaimTypes.Role).Concat(
+                   identity.FindAll(OneloginRoleClaimType))
+                       ?.Select(c => c.Value);
+        }
+
         private string GetUserId(ClaimsPrincipal principal, string email)
         {
             // ClaimTypes.NameIdentifier is used to represent user ID however different SAML IdPs may pass
             // - email
             // - user name
+            // - actual id
             // or not pass it at all
             // Update logic below according to your needs
+
             var id = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (id == null || id == email)
@@ -86,10 +158,16 @@ namespace CumulusPro.Saml.Prototype.Services
 
         private (string, string, string) GetUserNames(ClaimsIdentity identity)
         {
-            // SAML IdP may not pass firstName, lastName, userName
+            // SAML IdP may not pass firstName, lastName, userName 
+            // or pass it in the attributes with non-standard names
             // Update logic below according to your needs
-            var firstName = identity.FindFirst(ClaimTypes.GivenName)?.Value;
-            var lastName = identity.FindFirst(ClaimTypes.Surname)?.Value;
+
+            var firstName = identity.FindFirst(ClaimTypes.GivenName)?.Value 
+                ?? identity.FindFirst(OneloginFirstNameClaimType)?.Value;
+
+            var lastName = identity.FindFirst(ClaimTypes.Surname)?.Value
+                ?? identity.FindFirst(OneloginLastNameClaimType)?.Value;
+
             var userName = identity.FindFirst(ClaimTypes.Name)?.Value ??
                 (firstName != null || lastName != null
                     ? firstName + " " + lastName
