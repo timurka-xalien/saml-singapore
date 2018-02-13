@@ -32,7 +32,7 @@ namespace CumulusPro.Saml.Prototype.Services
 
         public override ClaimsPrincipal Authenticate(string resourceName, ClaimsPrincipal incomingPrincipal)
         {
-            _claimsService.SetPrincipalAdditionalClaims(incomingPrincipal);
+            _claimsService.AddPrincipalExtraClaims(incomingPrincipal);
             RegisterUserIfNeeded(incomingPrincipal);
 
             return incomingPrincipal;
