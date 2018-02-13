@@ -23,6 +23,8 @@ namespace CumulusPro.Saml.Prototype.Services
                 EntityId = "http://www.okta.com/exkok2qjhccpG6A4v2p6",
                 Description = "Okta Identity Provider",
                 LogoUrl = "https://www.okta.com/sites/all/themes/Okta/images/blog/Logos/Okta_Logo_BrightBlue_Medium.png",
+                SilentLogout = true,
+                RedirectOnLogoutUrl = "https://mailsamlpoc.okta.com/app/UserHome",
                 RegisteredDomains =
                 {
                     new EmailDomain
@@ -41,9 +43,10 @@ namespace CumulusPro.Saml.Prototype.Services
             var ipdSustainsys = new SamlIdentityProvider
             {
                 Id = Guid.NewGuid(),
-                EntityId = "https://sustainsys.saml2.stubidp/Metadata",
+                EntityId = "https://stubidp.sustainsys.com/Metadata",
                 Description = "Sustainsys Identity Provider",
                 LogoUrl = "https://stubidp.sustainsys.com/content/sustainsys.png",
+                SilentLogout = false,
                 RegisteredDomains =
                 {
                     new EmailDomain
@@ -90,6 +93,11 @@ namespace CumulusPro.Saml.Prototype.Services
                 .Where(idp => idp.RegisteredDomains.Any(d => d.Domain == domain))
                 .Select(idp => idp.EntityId)
                 .SingleOrDefault();
+        }
+
+        public SamlIdentityProvider GetIdentityProviderByEntityId(string idpEntityId)
+        {
+            return GetRegisteredIdentityProviders().Single(idP => idP.EntityId == idpEntityId);
         }
 
         public static SamlIdentityProvidersRepository GetInstance()

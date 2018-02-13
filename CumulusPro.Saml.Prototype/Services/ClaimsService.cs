@@ -1,6 +1,8 @@
 ﻿using CumulusPro.Saml.Prototype.Models;
 using System;
+using System.Linq;
 using System.Security.Claims;
+using System.Security.Principal;
 
 namespace CumulusPro.Saml.Prototype.Services
 {
@@ -9,17 +11,20 @@ namespace CumulusPro.Saml.Prototype.Services
         private const string DefaultUserName = "Anonymous";
         private const string IdentityProviderClaimType =
             @"http://schemas.microsoft.com/accesscontrolservice/2010/07/claims/identityprovider";
-        private const string ExternalSaml2SsoIdentityProvider = "External SAML2 SSO IdentityProvider";
 
         public void SetPrincipalAdditionalClaims(ClaimsPrincipal incomingPrincipal)
         {
             var identity = (ClaimsIdentity)incomingPrincipal.Identity;
 
+            // Add claim AuthenticationType to be able to determine how user was authenticated 
             identity.AddClaim(new Claim(nameof(AuthenticationType), AuthenticationType.Saml.ToString()));
 
+            // IdP EntityId is specified as Issuer of all claims, save it as distinct IdentityProvider claim for clarity. 
+            // Besides, we do need this claim either way as ASP.NET MVC uses it to generate AntiForgeryToken
             if (incomingPrincipal.FindFirst(IdentityProviderClaimType) == null)
             {
-                identity.AddClaim(new Claim(IdentityProviderClaimType, ExternalSaml2SsoIdentityProvider));
+                var idpEntityId = identity.Claims.First().Issuer;
+                identity.AddClaim(new Claim(IdentityProviderClaimType, idpEntityId));
             }
         }
 
@@ -58,6 +63,11 @@ namespace CumulusPro.Saml.Prototype.Services
                 //FirstName = firstName,
                 //LastName = lastName
             };
+        }
+
+        public string GetIdentityProviderEntityId(IPrincipal principal)
+        {
+            return ((ClaimsIdentity)principal.Identity).FindFirst(IdentityProviderClaimType)?.Value;
         }
     }
 }

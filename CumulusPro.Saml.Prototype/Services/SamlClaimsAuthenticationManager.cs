@@ -24,14 +24,9 @@ namespace CumulusPro.Saml.Prototype.Services
         {
             get
             {
-                if (_authenticationService == null)
-                {
-                    _authenticationService = _authenticationService = new AuthenticationService(
-                        HttpContext.Current?.GetOwinContext()?.Authentication,
-                        HttpContext.Current?.GetOwinContext()?.GetUserManager<ApplicationUserManager>());
-                }
-
-                return _authenticationService;
+                 return new AuthenticationService(
+                    HttpContext.Current.GetOwinContext().Authentication,
+                    HttpContext.Current.GetOwinContext().GetUserManager<ApplicationUserManager>());
             }
         }
 

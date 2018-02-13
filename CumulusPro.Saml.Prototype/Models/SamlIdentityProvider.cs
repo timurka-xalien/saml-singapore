@@ -8,8 +8,6 @@ namespace CumulusPro.Saml.Prototype.Models
         public SamlIdentityProvider()
         {
             RegisteredDomains = new List<EmailDomain>();
-
-            SingleLogoutSupported = true;
         }
 
         public Guid Id { get; set; }
@@ -18,7 +16,9 @@ namespace CumulusPro.Saml.Prototype.Models
 
         public string Description { get; set; }
 
-        public bool SingleLogoutSupported { get; set; }
+        public string RedirectOnLogoutUrl { get; set; }
+
+        public bool SilentLogout { get; set; }
 
         public string LogoUrl { get; set; }
 

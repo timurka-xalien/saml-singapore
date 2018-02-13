@@ -1,17 +1,12 @@
-﻿using System;
-using System.Globalization;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using System.Web;
-using System.Web.Mvc;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.Owin;
-using Microsoft.Owin.Security;
-using CumulusPro.Saml.Prototype.Models;
+﻿using CumulusPro.Saml.Prototype.Models;
 using CumulusPro.Saml.Prototype.Services;
 using CumulusPro.Saml.Prototype.Services.Services;
+using Microsoft.AspNet.Identity;
 using NLog;
+using System.IdentityModel.Services;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using System.Web.Mvc;
 
 namespace CumulusPro.Saml.Prototype.Controllers
 {
@@ -19,12 +14,14 @@ namespace CumulusPro.Saml.Prototype.Controllers
     public partial class AccountController : Controller
     {
         private Logger _logger = LogManager.GetCurrentClassLogger();
+        private ClaimsService _claimsService;
 
         private AuthenticationService _authenticationService;
 
         public AccountController()
         {
             _authenticationService = new AuthenticationService(AuthenticationManager, UserManager);
+            _claimsService = new ClaimsService();
         }
 
         public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager)
@@ -103,14 +100,33 @@ namespace CumulusPro.Saml.Prototype.Controllers
 
             if (authenticationType == AuthenticationType.Saml.ToString())
             {
-                return RedirectToAction("Logout", "Saml2");
+                var idpEntityId = _claimsService.GetIdentityProviderEntityId(User);
+                var identityProvider = SamlIdentityProvidersRepository.GetIdentityProviderByEntityId(idpEntityId);
+
+                // Initiate SLO only if IdentityProvider allows user to logout manually.
+                // E.g., Okta, silently logs user out
+                // For such providers we kill local session and redirect user to URL specified in RedirectOnLogoutUrl
+                if (!identityProvider.SilentLogout)
+                {
+                    return RedirectToAction("Logout", "Saml2");
+                }
+
+                DeleteLocalSession();
+
+                return Redirect(identityProvider.RedirectOnLogoutUrl);
             }
 
+            DeleteLocalSession();
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        private void DeleteLocalSession()
+        {
             _logger.Log(LogLevel.Debug, $"SAML: AccountController.Logout: Log out user {User.Identity.Name} locally.");
 
             AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
-
-            return RedirectToAction("Index", "Home");
+            FederatedAuthentication.SessionAuthenticationModule.DeleteSessionTokenCookie();
         }
 
         private SamlIdentityProvidersRepository SamlIdentityProvidersRepository
