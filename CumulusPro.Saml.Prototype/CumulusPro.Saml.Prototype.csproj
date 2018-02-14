@@ -35,6 +35,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -214,6 +215,7 @@
     <Compile Include="Services\ClaimsService.cs" />
     <Compile Include="Services\SamlClaimsAuthenticationManager.cs" />
     <Compile Include="Services\SamlIdentityProvidersRepository.cs" />
+    <Compile Include="Services\SustainsysLoggerAdapter.cs" />
     <Compile Include="Services\UserManagementService.cs" />
     <Compile Include="Services\Utils.cs" />
     <Compile Include="Startup.cs" />

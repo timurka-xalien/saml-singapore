@@ -5,7 +5,6 @@ using Microsoft.AspNet.Identity;
 using NLog;
 using System.IdentityModel.Services;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using System.Web.Mvc;
 
 namespace CumulusPro.Saml.Prototype.Controllers
@@ -21,6 +20,7 @@ namespace CumulusPro.Saml.Prototype.Controllers
         public AccountController()
         {
             _userManagementService = new UserManagementService(AuthenticationManager, UserManager);
+            _identityProvidersRepository = new SamlIdentityProvidersRepository();
             _claimsService = new ClaimsService();
         }
 
@@ -44,7 +44,7 @@ namespace CumulusPro.Saml.Prototype.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Login(LoginViewModel model, string returnUrl)
+        public ActionResult Login(LoginViewModel model, string returnUrl)
         {
             if (!ModelState.IsValid)
             {
