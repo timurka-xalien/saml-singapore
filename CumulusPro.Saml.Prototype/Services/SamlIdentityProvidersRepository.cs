@@ -8,7 +8,7 @@ namespace CumulusPro.Saml.Prototype.Services
     /// <summary>
     /// This is a reporitory of SamlIdentityProvider objects which contain additional settings of SAML IdentityProviders.
     /// These settings are required solely by our application logic and are not used by Sustainsys.
-    /// I just hardcoded providers settings here for clarity. You need to load them from config file or database
+    /// I just hardcoded providers settings here for brevity. You need to load them from config file or database
     /// </summary>
     public class SamlIdentityProvidersRepository
     {
