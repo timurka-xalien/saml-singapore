@@ -5,17 +5,21 @@ using System.Linq;
 
 namespace CumulusPro.Saml.Prototype.Services
 {
+    /// <summary>
+    /// This is a reporitory of SamlIdentityProvider objects which contain additional settings of SAML IdentityProviders.
+    /// These settings are required solely by our application logic and are not used by Sustainsys.
+    /// I just hardcoded providers settings here for clarity. You need to load them from config file or database
+    /// </summary>
     public class SamlIdentityProvidersRepository
     {
-        private static readonly SamlIdentityProvidersRepository _instance = new SamlIdentityProvidersRepository();
         private IEnumerable<SamlIdentityProvider> _registeredProviders;
 
-        private SamlIdentityProvidersRepository()
+        public SamlIdentityProvidersRepository()
         {
-            CreateDefaultConfiguration();
+            PopulateRegisteredProviders();
         }
 
-        public void CreateDefaultConfiguration()
+        public void PopulateRegisteredProviders()
         {
             var idpOkta = new SamlIdentityProvider
             {
@@ -95,21 +99,27 @@ namespace CumulusPro.Saml.Prototype.Services
             return _registeredProviders;
         }
 
+        /// <summary>
+        /// Get all supported email domains
+        /// </summary>
         private IEnumerable<string> GetRegisteredEmailDomains()
         {
             return GetRegisteredIdentityProviders()
                 .SelectMany(idp => idp.RegisteredDomains.Select(d => d.Domain));
         }
 
+        /// <summary>
+        /// Check if user having email at specified emailDomain have to be authenticated using SAML SSO
+        /// </summary>
         public bool IsSamlAuthenticationRequired(string emailDomain)
         {
             return GetRegisteredEmailDomains().Contains(emailDomain);
         }
 
-        public string GetIdentityProviderEntityId(string domain)
+        public string GetIdentityProviderEntityIdByEmailDomain(string emailDomain)
         {
             return GetRegisteredIdentityProviders()
-                .Where(idp => idp.RegisteredDomains.Any(d => d.Domain == domain))
+                .Where(idp => idp.RegisteredDomains.Any(d => d.Domain == emailDomain))
                 .Select(idp => idp.EntityId)
                 .SingleOrDefault();
         }
@@ -117,11 +127,6 @@ namespace CumulusPro.Saml.Prototype.Services
         public SamlIdentityProvider GetIdentityProviderByEntityId(string idpEntityId)
         {
             return GetRegisteredIdentityProviders().Single(idP => idP.EntityId == idpEntityId);
-        }
-
-        public static SamlIdentityProvidersRepository GetInstance()
-        {
-            return _instance;
         }
     }
 }

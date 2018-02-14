@@ -15,12 +15,12 @@ namespace CumulusPro.Saml.Prototype.Controllers
     {
         private Logger _logger = LogManager.GetCurrentClassLogger();
         private ClaimsService _claimsService;
-
-        private AuthenticationService _authenticationService;
+        private SamlIdentityProvidersRepository _identityProvidersRepository;
+        private UserManagementService _userManagementService;
 
         public AccountController()
         {
-            _authenticationService = new AuthenticationService(AuthenticationManager, UserManager);
+            _userManagementService = new UserManagementService(AuthenticationManager, UserManager);
             _claimsService = new ClaimsService();
         }
 
@@ -36,7 +36,7 @@ namespace CumulusPro.Saml.Prototype.Controllers
         public ActionResult Login(string returnUrl)
         {
             ViewBag.ReturnUrl = returnUrl;
-            ViewBag.IdentityProviders = SamlIdentityProvidersRepository.GetRegisteredIdentityProviders();
+            ViewBag.IdentityProviders = _identityProvidersRepository.GetRegisteredIdentityProviders();
             return View();
         }
 
@@ -54,14 +54,14 @@ namespace CumulusPro.Saml.Prototype.Controllers
             // Check if we need to login user locally (in case no SAML Identity Provider is registered for specified email domain)
             var emailDomain = Utils.GetEmailDomain(model.Email);
             var isSamlAuthenticationRequired =
-                SamlIdentityProvidersRepository.IsSamlAuthenticationRequired(emailDomain);
+                _identityProvidersRepository.IsSamlAuthenticationRequired(emailDomain);
 
             if (isSamlAuthenticationRequired)
             {
                 _logger.Log(LogLevel.Debug, $"SAML: AccountController.Login: Log in user {model.Email} via SAML SSO.");
 
                 // Get appropriate IdP entity id
-                var idpEntityId = SamlIdentityProvidersRepository.GetIdentityProviderEntityId(emailDomain);
+                var idpEntityId = _identityProvidersRepository.GetIdentityProviderEntityIdByEmailDomain(emailDomain);
 
                 if (idpEntityId == null)
                 {
@@ -79,7 +79,7 @@ namespace CumulusPro.Saml.Prototype.Controllers
             _logger.Log(LogLevel.Debug, $"SAML: AccountController.Login: Log in user {model.Email} locally.");
 
             // Authenticate locally
-            var succeeded = _authenticationService.Authenticate(AuthenticationType.Local, model.Email, model.Password);
+            var succeeded = _userManagementService.AuthenticateLocally(model.Email, model.Password);
 
             if (succeeded)
             {
@@ -96,12 +96,16 @@ namespace CumulusPro.Saml.Prototype.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult LogOff()
         {
+            _logger.Log(LogLevel.Debug, $"SAML: AccountController.LogOff: Log out user {User.Identity.Name}.");
+
+            // Find out how user was signed in to understand how to sign him out
             var authenticationType = ((ClaimsIdentity)User.Identity).FindFirstValue(nameof(AuthenticationType));
 
             if (authenticationType == AuthenticationType.Saml.ToString())
             {
+                // Get IdentityProvider settings
                 var idpEntityId = _claimsService.GetIdentityProviderEntityId(User);
-                var identityProvider = SamlIdentityProvidersRepository.GetIdentityProviderByEntityId(idpEntityId);
+                var identityProvider = _identityProvidersRepository.GetIdentityProviderByEntityId(idpEntityId);
 
                 // Initiate SLO only if IdentityProvider allows user to logout manually.
                 // E.g., Okta, silently logs user out
@@ -123,15 +127,10 @@ namespace CumulusPro.Saml.Prototype.Controllers
 
         private void DeleteLocalSession()
         {
-            _logger.Log(LogLevel.Debug, $"SAML: AccountController.Logout: Log out user {User.Identity.Name} locally.");
+            _logger.Log(LogLevel.Debug, $"SAML: AccountController.DeleteLocalSession: Log out user {User.Identity.Name} locally.");
 
             AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
             FederatedAuthentication.SessionAuthenticationModule.DeleteSessionTokenCookie();
-        }
-
-        private SamlIdentityProvidersRepository SamlIdentityProvidersRepository
-        {
-            get => SamlIdentityProvidersRepository.GetInstance();
         }
     }
 }
