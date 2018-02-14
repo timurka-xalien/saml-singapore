@@ -20,3 +20,9 @@
 /Sustainsys.Saml2/Sustainsys.Saml2.Mvc/bin/Debug
 *.log
 /ConsoleApp1
+/CumulusPro.Saml.Prototype/obj/Release
+/Sustainsys.Saml2/Sustainsys.Saml2/bin/Release
+/Sustainsys.Saml2/Sustainsys.Saml2/obj/Release
+/Sustainsys.Saml2/Sustainsys.Saml2.HttpModule/obj/Release
+/Sustainsys.Saml2/Sustainsys.Saml2.Mvc/bin/Release
+/Sustainsys.Saml2/Sustainsys.Saml2.Mvc/obj/Release
