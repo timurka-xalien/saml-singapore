@@ -74,6 +74,7 @@ namespace CumulusPro.Saml.Prototype.Services
                 LogoUrl = "https://www.onelogin.com/assets/img/new-logo-onelogin.svg",
                 SilentLogout = true,
                 RedirectOnLogoutUrl = "https://wrety-dev.onelogin.com/portal/",
+                ForcedLogoutUrl = "https://wrety-dev.onelogin.com/logout",
                 RegisteredDomains =
                 {
                     new EmailDomain
@@ -127,6 +128,15 @@ namespace CumulusPro.Saml.Prototype.Services
         public SamlIdentityProvider GetIdentityProviderByEntityId(string idpEntityId)
         {
             return GetRegisteredIdentityProviders().Single(idP => idP.EntityId == idpEntityId);
+        }
+
+        /// <summary>
+        /// Returns IdentityProvider which Description contains passed search term (Case Insensitive)
+        /// </summary>
+        public SamlIdentityProvider FindIdentityProviderBySearchTerm(string searchTerm)
+        {
+            return GetRegisteredIdentityProviders()
+                .SingleOrDefault(idP => idP.Description.ToLower().Contains(searchTerm.ToLower()));
         }
     }
 }

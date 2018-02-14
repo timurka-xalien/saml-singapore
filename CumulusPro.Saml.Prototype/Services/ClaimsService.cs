@@ -57,19 +57,19 @@ namespace CumulusPro.Saml.Prototype.Services
             var (firstName, lastName, userName) = GetUserNames(identity);
 
             // Add standard Name claim if it is not defined
-            if (identity.FindFirst(ClaimTypes.Name) == null)
+            if (identity.FindFirst(ClaimTypes.Name) == null && userName != null)
             {
                 identity.AddClaim(new Claim(ClaimTypes.Name, userName));
             }
 
             // Add standard FirstName claim if it is not defined
-            if (identity.FindFirst(ClaimTypes.GivenName) == null)
+            if (identity.FindFirst(ClaimTypes.GivenName) == null && firstName != null)
             {
                 identity.AddClaim(new Claim(ClaimTypes.GivenName, firstName));
             }
 
             // Add standard LastName claim if it is not defined
-            if (identity.FindFirst(ClaimTypes.Surname) == null)
+            if (identity.FindFirst(ClaimTypes.Surname) == null && lastName != null)
             {
                 identity.AddClaim(new Claim(ClaimTypes.Surname, lastName));
             }

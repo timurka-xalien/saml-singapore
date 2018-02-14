@@ -92,6 +92,31 @@ namespace CumulusPro.Saml.Prototype.Controllers
         }
 
         // POST: /Account/LogOff
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        [AllowAnonymous]
+        public ActionResult OnOneLoginLogout()
+        {
+            // Despite the fact that we do not implement SLO with OneLogin they do redirect user 
+            // to the prototype after user logs out from OneLogin site. 
+            // Moreover with the redirect they send non-signed logout message 
+            // which is a violation of SAML specification. 
+            // And as far as Sustainsys demands that all messages are signed, it throws an exception. 
+            // It turned out that this is a known issue described here: 
+            //    https://github.com/Sustainsys/Saml2/issues/503. 
+            // Sustainsys suggested to fix it as a sponsored development. 
+            // So I added a workaround for this issue here as I think that it is better not to alter
+            // Sustainsys library in cases when we can deal with an issue on our side
+            // Feel free to remove this workaround and make a fix in Sustainsys library code.
+
+            // We cannot let OneLogin to redirect to Sustainsys Saml2Controller on logout so
+            // we configure OneLogin to redirect to this action and here we just redirect user back to OneLogin,
+            // to URL which forcibly log outs user
+            var oneLoginIdP = _identityProvidersRepository.FindIdentityProviderBySearchTerm("OneLogin");
+            return Redirect(oneLoginIdP.ForcedLogoutUrl);
+        }
+
+        // POST: /Account/LogOff
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult LogOff()
