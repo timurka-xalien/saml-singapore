@@ -91,9 +91,6 @@ namespace CumulusPro.Saml.Prototype.Controllers
             return View(model);
         }
 
-        // POST: /Account/LogOff
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
         [AllowAnonymous]
         public ActionResult OnOneLoginLogout()
         {
