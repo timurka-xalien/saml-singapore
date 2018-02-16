@@ -84,7 +84,7 @@
             @foreach (SamlIdentityProvider idp in ViewBag.IdentityProviders)
             {
                 <div class="idp-login-btn">
-                    <a href="@Url.Action("SignIn", "SAML2", new { idp = idp.EntityId, returnUrl = ViewBag.ReturnUrl })">
+                    <a href="@Url.Action("SignIn", "SAML2", new { idp = idp.EntityId, ReturnUrl = ViewBag.ReturnUrl })">
                         <img src="@idp.LogoUrl" width="100"/>
                     </a>
                 </div>
