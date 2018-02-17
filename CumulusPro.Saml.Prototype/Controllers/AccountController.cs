@@ -36,6 +36,7 @@ namespace CumulusPro.Saml.Prototype.Controllers
         public ActionResult Login(string returnUrl)
         {
             ViewBag.ReturnUrl = returnUrl;
+            // This is just quick and dirty solution. Use dedicated model instead
             ViewBag.IdentityProviders = _identityProvidersRepository.GetRegisteredIdentityProviders();
             return View();
         }
