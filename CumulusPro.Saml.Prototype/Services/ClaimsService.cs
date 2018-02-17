@@ -131,9 +131,10 @@ namespace CumulusPro.Saml.Prototype.Services
             // Update logic below according to your needs
             // Use another role/group claim type if ClaimTypes.Role doesn't fit your needs
 
-            return identity.FindAll(ClaimTypes.Role).Concat(
-                   identity.FindAll(OneloginRoleClaimType))
-                       ?.Select(c => c.Value);
+            // Get standard Role claims first
+            return identity.FindAll(ClaimTypes.Role).Select(c => c.Value).Concat(
+                   // Get OneLogin claims if any (OneLogin role claim contains list of groups separated by ;)
+                   identity.FindAll(OneloginRoleClaimType).SelectMany(olrc => olrc.Value.Split(';')));
         }
 
         private string GetUserId(ClaimsPrincipal principal, string email)
