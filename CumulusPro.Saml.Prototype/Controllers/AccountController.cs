@@ -4,6 +4,7 @@ using CumulusPro.Saml.Prototype.Services.Services;
 using Microsoft.AspNet.Identity;
 using NLog;
 using System.IdentityModel.Services;
+using System.Linq;
 using System.Security.Claims;
 using System.Web.Mvc;
 
@@ -54,8 +55,7 @@ namespace CumulusPro.Saml.Prototype.Controllers
 
             // Check if we need to login user locally (in case no SAML Identity Provider is registered for specified email domain)
             var emailDomain = Utils.GetEmailDomain(model.Email);
-            var isSamlAuthenticationRequired =
-                _identityProvidersRepository.IsSamlAuthenticationRequired(emailDomain);
+            var isSamlAuthenticationRequired = IsSamlAuthenticationRequired(emailDomain);
 
             if (isSamlAuthenticationRequired)
             {
@@ -154,6 +154,14 @@ namespace CumulusPro.Saml.Prototype.Controllers
 
             AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
             FederatedAuthentication.SessionAuthenticationModule.DeleteSessionTokenCookie();
+        }
+
+        /// <summary>
+        /// Check if user having email at specified emailDomain have to be authenticated using SAML SSO
+        /// </summary>
+        private bool IsSamlAuthenticationRequired(string emailDomain)
+        {
+            return _identityProvidersRepository.GetRegisteredEmailDomains().Contains(emailDomain);
         }
     }
 }

@@ -103,18 +103,10 @@ namespace CumulusPro.Saml.Prototype.Services
         /// <summary>
         /// Get all supported email domains
         /// </summary>
-        private IEnumerable<string> GetRegisteredEmailDomains()
+        public IEnumerable<string> GetRegisteredEmailDomains()
         {
             return GetRegisteredIdentityProviders()
                 .SelectMany(idp => idp.RegisteredDomains.Select(d => d.Domain));
-        }
-
-        /// <summary>
-        /// Check if user having email at specified emailDomain have to be authenticated using SAML SSO
-        /// </summary>
-        public bool IsSamlAuthenticationRequired(string emailDomain)
-        {
-            return GetRegisteredEmailDomains().Contains(emailDomain);
         }
 
         public string GetIdentityProviderEntityIdByEmailDomain(string emailDomain)
