@@ -88,10 +88,21 @@ namespace CumulusPro.Saml.Prototype.Services
 
         private void EnsureStandardRolesClaimsDefined(ClaimsIdentity identity)
         {
+            var multipleRolesClaim = 
+                identity
+                    .FindAll(ClaimTypes.Role)
+                    .Where(claim => claim.Value.Contains(";"))
+                    .SingleOrDefault();
+
             // Add standard Role claim if it is not defined
-            if (identity.FindFirst(ClaimTypes.Role) == null)
+            if (identity.FindFirst(ClaimTypes.Role) == null || multipleRolesClaim != null)
             {
                 var roles = GetRoles(identity);
+
+                if (multipleRolesClaim != null)
+                {
+                    identity.RemoveClaim(multipleRolesClaim);
+                }
 
                 identity.AddClaims(roles.Select(r => new Claim(ClaimTypes.Role, r)));
             }
@@ -132,9 +143,11 @@ namespace CumulusPro.Saml.Prototype.Services
             // Use another role/group claim type if ClaimTypes.Role doesn't fit your needs
 
             // Get standard Role claims first
-            return identity.FindAll(ClaimTypes.Role).Select(c => c.Value).Concat(
-                   // Get OneLogin claims if any (OneLogin role claim contains list of groups separated by ;)
-                   identity.FindAll(OneloginRoleClaimType).SelectMany(olrc => olrc.Value.Split(';')));
+            return identity.FindAll(ClaimTypes.Role).Concat(identity.FindAll(OneloginRoleClaimType))
+                   // Get OneLogin claims if any (OneLogin role claim contains list of roles separated by ;)
+                   // Standard role claim also may contain multiple roles separated by ;)
+                   .SelectMany(olrc => olrc.Value.Split(';'))
+                   .Distinct();
         }
 
         private string GetUserId(ClaimsPrincipal principal, string email)
