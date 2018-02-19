@@ -1,4 +1,5 @@
 ﻿using CumulusPro.Saml.Prototype.Models;
+using CumulusPro.Saml.Prototype.Services.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,6 +41,24 @@ namespace CumulusPro.Saml.Prototype.Services
                     {
                         Id = Guid.NewGuid(),
                         Domain = "adidas.com"
+                    }
+                }
+            };
+
+            var idpAzureAd = new SamlIdentityProvider
+            {
+                Id = Guid.NewGuid(),
+                EntityId = "https://sts.windows.net/eb1e0391-b3de-41cd-983f-661a7c31aff5/",
+                Description = "Azure AD Identity Provider",
+                LogoUrl = Utils.GetContentFolderImageUrl("AzureAD logo.png"),
+                SilentLogout = false,
+                RedirectOnLogoutUrl = "https://portal.azure.com",
+                RegisteredDomains =
+                {
+                    new EmailDomain
+                    {
+                        Id = Guid.NewGuid(),
+                        Domain = "hotmail.com"
                     }
                 }
             };
@@ -89,7 +108,8 @@ namespace CumulusPro.Saml.Prototype.Services
             {
                 idpOkta,
                 ipdSustainsys,
-                ipdOnelogin
+                ipdOnelogin,
+                idpAzureAd
             };
         }
 
