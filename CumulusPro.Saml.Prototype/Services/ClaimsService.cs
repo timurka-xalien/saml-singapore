@@ -132,8 +132,22 @@ namespace CumulusPro.Saml.Prototype.Services
             // SAML IdP may pass email in the attributes with non-standard name
             // Update logic below according to your needs
 
-            return identity.FindFirst(ClaimTypes.Email)?.Value 
+            var email = identity.FindFirst(ClaimTypes.Email)?.Value 
                 ?? identity.FindFirst(OneloginEmailClaimType)?.Value;
+
+            if (email != null)
+            {
+                return email;
+            }
+
+            var name = identity.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (name?.Contains("@") == true)
+            {
+                return name;
+            }
+
+            throw new Exception("Identity Provider haven't passed email attribute. Please configure Identity Provider to pass user email in SAML assertion.");
         }
 
         private IEnumerable<string> GetRoles(ClaimsIdentity identity)
