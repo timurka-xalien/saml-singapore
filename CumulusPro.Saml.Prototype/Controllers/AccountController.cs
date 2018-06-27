@@ -108,10 +108,10 @@ namespace CumulusPro.Saml.Prototype.Controllers
             // Feel free to remove this workaround and make a fix in Sustainsys library code.
 
             // We cannot let OneLogin to redirect to Sustainsys Saml2Controller on logout so
-            // we configure OneLogin to redirect to this action and here we just redirect user back to OneLogin,
-            // to URL which forcibly logs out user
-            var oneLoginIdP = _identityProvidersRepository.FindIdentityProviderBySearchTerm("OneLogin");
-            return Redirect(oneLoginIdP.ForcedLogoutUrl);
+            // we configure OneLogin to redirect to this action and here we just redirect user to the homepage
+            // as OneLogin has already logged user out
+
+            return Redirect("~/");
         }
 
         // POST: /Account/LogOff

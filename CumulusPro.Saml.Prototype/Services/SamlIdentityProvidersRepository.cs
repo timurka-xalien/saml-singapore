@@ -25,11 +25,10 @@ namespace CumulusPro.Saml.Prototype.Services
             var idpOkta = new SamlIdentityProvider
             {
                 Id = Guid.NewGuid(),
-                EntityId = "http://www.okta.com/exkok2qjhccpG6A4v2p6",
+                EntityId = "http://www.okta.com/exk3if4eGO9UX2eme355",
                 Description = "Okta Identity Provider",
                 LogoUrl = "https://www.okta.com/sites/all/themes/Okta/images/blog/Logos/Okta_Logo_BrightBlue_Medium.png",
-                SilentLogout = true,
-                RedirectOnLogoutUrl = "https://mailsamlpoc.okta.com/app/UserHome",
+                SilentLogout = false,
                 RegisteredDomains =
                 {
                     new EmailDomain
@@ -91,9 +90,7 @@ namespace CumulusPro.Saml.Prototype.Services
                 EntityId = "https://app.onelogin.com/saml/metadata/754212",
                 Description = "Onelogin Identity Provider",
                 LogoUrl = "https://www.onelogin.com/assets/img/new-logo-onelogin.svg",
-                SilentLogout = true,
-                RedirectOnLogoutUrl = "https://wrety-dev.onelogin.com/portal/",
-                ForcedLogoutUrl = "https://wrety-dev.onelogin.com/logout",
+                SilentLogout = false,
                 RegisteredDomains =
                 {
                     new EmailDomain

@@ -18,8 +18,6 @@ namespace CumulusPro.Saml.Prototype.Models
 
         public string RedirectOnLogoutUrl { get; set; }
 
-        public string ForcedLogoutUrl { get; set; }
-
         public bool SilentLogout { get; set; }
 
         public string LogoUrl { get; set; }
